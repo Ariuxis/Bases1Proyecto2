@@ -46,14 +46,41 @@ create function cardrecord(id int) returns void as $$
 declare
 vargen record;
 begin
-for vargen in select distinct transactiontype, transactiondate, 
-transactionvalue, personname, stationname from person natural join user natural join seller
-natural join transaction natural join station
+for vargen in select distinct cardid, transactionid, transactiontype, 
+transactiondate, transactionvalue, personname as sellername, stationname 
+from transaction natural left join seller natural left join person
+natural left join station natural left join card natural left join users
+where userid = id order by cardid, transactiondate;
+
+
+select distinct transactionid, transactiontype, transactiondate, transactionvalue, sellerid
+from transaction natural left join seller natural left join person natural left join users
+where userid = 5;
+
+with sellernames as
+(select distinct sellerid as sellid, personname as sellername 
+	from person natural left join seller natural left join transaction where cardid = 18)
+select transactionid, transactiontype, transactiondate, transactionvalue,
+sellername from transaction natural left join
+sellernames natural left join card natural left join users 
+where userid = 5 and sellerid = sellid order by cardid, transactiondate;
+
+
+select distinct cardid, transactionid, transactiontype, 
+transactiondate, transactionvalue, personname as sellername, stationname 
+from transaction natural left join seller natural left join person
+natural left join station natural left join card natural left join users
+where userid = 5 order by cardid, transactiondate;
+
+select personid, personname, cardid, transactionid, transactiontype, transactiondate, sellerid 
+from person natural left join users natural left join card natural left join transaction
+natural left join seller
+where userid = 5;
 
 end;
 $$ language plpgsql;
 
-select cardrecord(5);
+select cardrecord(11);
 # 4. #
 
 # 5. #

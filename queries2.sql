@@ -63,6 +63,7 @@ end;
 $$ language plpgsql;
 
 select cardrecord(5);
+
 # 4. #
 
 with ranking as
@@ -72,38 +73,25 @@ select row_number() over(order by total desc) as posicion, * from ranking;
 
 # 5. #
 
-select distinct date_part('month', transactionvalue), personname, sum(transactionvalue) as total from 
-transaction natural join seller where date_part('year', transactionvalue) = 2017;
-
-SELECT date_trunc('month', transactiondate) AS month, sum(transactionvalue) as total
-FROM transaction
-GROUP BY month;
-
-
-select distinct personname, sum(transactionvalue) over(partition by personname) as total
-from transaction natural join seller natural join person 
-where date_part('year', transactiondate) = 2017 and
-transactiontype in ('Venta', 'Recarga');
-
-select to_char(transactiondate,'Month') as month, personname, 
-sum(transactionvalue) over(partition by personname)as total
-from transaction natural join seller
-group by month;
-
 with months as
 (select distinct to_char(transactiondate,'Month') as month, 
 	personname, sum(transactionvalue) as total 
-from transaction natural join seller natural join person
-where date_part('year', transactiondate) = 2017 group by month, personname
-order by month desc, total desc)
-select month, personname, total from 
-(select month, personname, max(total) from months group by month, personname) as t;
+	from transaction natural join seller natural join person
+	where date_part('year', transactiondate) = 2017 group by month, personname)
 
-select personname, sum(transactionvalue) as total
- from person natural join seller natural join transaction
- where personname = 'Adams Meynell' and date_part('month', transactiondate) = 8
- group by personname;
+select months.month, months.personname, months.total 
+from (select month, max(total) as maxtotal from months group by month) as query
+inner join months on months.month = query.month and months.total = query.maxtotal 
+order by month desc;
 
 # 6. #
+
+with shiftcount as
+(select distinct personname, shiftid, 
+	count(transactiontype) over(partition by shiftid) as counttotal 
+	from person natural join seller natural join shiftseller 
+	natural join shift join transaction using(sellerid)
+	where transactiontype in ('Recarga', 'Venta')
+	order by personname, shiftid)
 
 # 7. #

@@ -88,10 +88,14 @@ order by month desc;
 
 with shiftcount as
 (select distinct personname, shiftid, 
-	count(transactiontype) over(partition by shiftid) as counttotal 
+	count(transactiontype) over(partition by personname, shiftid) as counttotal 
 	from person natural join seller natural join shiftseller 
 	natural join shift join transaction using(sellerid)
 	where transactiontype in ('Recarga', 'Venta')
-	order by personname, shiftid)
+	order by shiftid, personname),
+	avgshift as (select shiftid, avg(counttotal) as avgcount from shiftcount group by shiftid)
+
+select personname, shiftid, counttotal as selleravg, avgcount as shiftavg
+from shiftcount join avgshift using(shiftid) where counttotal < avgcount;
 
 # 7. #

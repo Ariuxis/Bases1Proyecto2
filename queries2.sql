@@ -72,6 +72,38 @@ select row_number() over(order by total desc) as posicion, * from ranking;
 
 # 5. #
 
+select distinct date_part('month', transactionvalue), personname, sum(transactionvalue) as total from 
+transaction natural join seller where date_part('year', transactionvalue) = 2017;
+
+SELECT date_trunc('month', transactiondate) AS month, sum(transactionvalue) as total
+FROM transaction
+GROUP BY month;
+
+
+select distinct personname, sum(transactionvalue) over(partition by personname) as total
+from transaction natural join seller natural join person 
+where date_part('year', transactiondate) = 2017 and
+transactiontype in ('Venta', 'Recarga');
+
+select to_char(transactiondate,'Month') as month, personname, 
+sum(transactionvalue) over(partition by personname)as total
+from transaction natural join seller
+group by month;
+
+with months as
+(select distinct to_char(transactiondate,'Month') as month, 
+	personname, sum(transactionvalue) as total 
+from transaction natural join seller natural join person
+where date_part('year', transactiondate) = 2017 group by month, personname
+order by month desc, total desc)
+select month, personname, total from 
+(select month, personname, max(total) from months group by month, personname) as t;
+
+select personname, sum(transactionvalue) as total
+ from person natural join seller natural join transaction
+ where personname = 'Adams Meynell' and date_part('month', transactiondate) = 8
+ group by personname;
+
 # 6. #
 
 # 7. #

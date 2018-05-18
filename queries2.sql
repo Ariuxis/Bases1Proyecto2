@@ -65,6 +65,11 @@ $$ language plpgsql;
 select cardrecord(5);
 # 4. #
 
+with ranking as
+(select distinct stationname, sum(transactionvalue) over(partition by stationname) as total
+from transaction natural join station where date_part('year', transactiondate) = 2017)
+select row_number() over(order by total desc) as posicion, * from ranking;
+
 # 5. #
 
 # 6. #

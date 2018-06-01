@@ -1,3 +1,11 @@
+/* Pontificia Universidad Javeriana, Cali
+ * Ingeniería de Sistemas y Computación
+ * Gestión y Modelación de Bases de Datos
+ * Andrea Timarán
+ * Laura Velásquez
+ * Antonio Yu
+ */
+
 # 1. #
 
 create or replace function transactiondetails(id int, transdate date) returns void as $$

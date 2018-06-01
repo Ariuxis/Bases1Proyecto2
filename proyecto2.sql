@@ -71,8 +71,10 @@ create table if not exists seller (
 	sellerid smallint primary key,
 	personid smallint references person(personid) not null,
 	sellershift varchar(30) not null,
+	assignedcards smallint not null,
 	check(sellerid >= 0 and sellerid <= 9999),
 	check(personid >= 0 and personid <= 9999),
+	check(assignedcards >= 0 and assignedcards <= 20),
 	check(sellershift = 'Tiempo completo' or sellershift = 'Medio tiempo' or
 		sellershift = '1/4 de tiempo' or sellershift = '3/4 de tiempo')
 );
@@ -80,8 +82,10 @@ create table if not exists seller (
 create table if not exists shiftseller (
 	shiftid smallint references shift(shiftid),
 	sellerid smallint references seller(sellerid),
+	currentsales smallint not null default 0,
 	check(shiftid >= 0 and shiftid <= 9999),
 	check(sellerid >= 0 and sellerid <= 9999),
+	check(currentsales >= 0 and currentsales <= 20),
 	primary key(shiftid, sellerid)
 );
 
